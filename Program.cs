@@ -115,7 +115,7 @@ namespace Log2Rng
           {
             str = new StatsBoostRange {min = 0x11F, max = 0x1E7},
             ene = new StatsBoostRange {min = 0xAC, max = 0x174},
-            def = new StatsBoostRange {min = 0xB6, max = 0x174}
+            def = new StatsBoostRange {min = 0xB6, max = 0x17E}
           },
           baseStats = new CharacterStats
           {
@@ -182,7 +182,7 @@ namespace Log2Rng
 
     static ushort levelUpStatsByRange(ref RngSeed seed, StatsBoostRange range, int levelAmount, ushort stat)
     {
-      ushort nbrInRange = RngShort(ref seed, (ushort)(levelAmount * (range.max - range.min) + 1));
+      ushort nbrInRange = RngShort(ref seed, (ushort)(levelAmount * ((range.max - range.min) + 1)));
       ushort newStat = (ushort)(nbrInRange + levelAmount * range.min + stat);
       if (newStat >= 0x6400)
         newStat = 0x6400;
@@ -196,14 +196,16 @@ namespace Log2Rng
       newStats.str = levelUpStatsByRange(ref seed, allCharacterData[character].levelUpBoosts.str, levelAmount, stats.str);
       newStats.ene = levelUpStatsByRange(ref seed, allCharacterData[character].levelUpBoosts.ene, levelAmount, stats.ene);
       newStats.def = levelUpStatsByRange(ref seed, allCharacterData[character].levelUpBoosts.def, levelAmount, stats.def);
+      newStats.maxHp = stats.maxHp;
+      newStats.maxEp = stats.maxEp;
       if (levelFrom < levelTo)
       {
         do
         {
           // This will increase the max HP by a percentage between 5.5% and 7.5%
-          newStats.maxHp = (ushort)(stats.maxHp + ((stats.maxHp * (RngShort(ref seed, 0x51f) + 0xe14)) >> 0x10));
-          newStats.maxEp = (ushort)(stats.maxEp + RngShort(ref seed, 3) + 2);
-          levelFrom = levelFrom + 1;
+          newStats.maxHp += (ushort)((newStats.maxHp * (RngShort(ref seed, 0x51f) + 0xe14)) >> 0x10);
+          newStats.maxEp += (ushort)(RngShort(ref seed, 3) + 2);
+          levelFrom++;
         } while (levelFrom < levelTo);
       }
       return newStats;
@@ -218,7 +220,7 @@ namespace Log2Rng
       public bool delta;
     }
 
-    static bool GetArguments(string[] args, out ProgArgs progArgs)
+    static bool TryParseArguments(string[] args, out ProgArgs progArgs)
     {
       progArgs = new ProgArgs();
       if (args.Length > 5)
@@ -299,7 +301,7 @@ namespace Log2Rng
     static void Main(string[] args)
     {
       ProgArgs progArgs = new ProgArgs();
-      if (!GetArguments(args, out progArgs) || (args.Length == 1 && (args[0] == "-h" || args[1] == "--help")))
+      if (!TryParseArguments(args, out progArgs) || (args.Length == 1 && (args[0] == "-h" || args[1] == "--help")))
       {
         printHelp();
         return;
