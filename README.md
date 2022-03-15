@@ -7,8 +7,9 @@ The only requirement is to have the .NET runtime installed. For Windows, you can
 ## Usage
 Syntax: dbzLog2StatsRng characterId fromLevel toLevel nbrFrames [-d | --delta
 
-Output the CSV data of the stats generated in Dragon Ball Z: The legacy of Goku 2 for the
-character characterId going from level fromLevel to level toLevel for nbrFrames frames.
+Syntax: dbzLog2StatsRng characterId fromLevel toLevel nbrFrames nbrExcessRolls [-d | --delta\n");
+
+Output the CSV data of the stats generated in Dragon Ball Z: The legacy of Goku 2 for the character characterId going from level fromLevel to level toLevel for nbrFrames frames with nbrExcessRolls additional RNG calls after file select fade out. This assumes frame 0 is pressing A upon skipping the intro cutscene and the frame output is when pressing A on file select
 
 Valid characterId are:
 
