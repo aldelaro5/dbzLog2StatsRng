@@ -167,6 +167,9 @@ namespace Log2Rng
       }
     };
 
+    const int nbrFramesFadeIn = 9;
+    const int nbrFramesFadeOut = 33;
+
     static uint Rng(ref RngSeed seed)
     {
       seed.seed1 = seed.seed1 + 0x2cbbc71 ^ seed.seed2;
@@ -217,18 +220,19 @@ namespace Log2Rng
       public int levelFrom;
       public int levelTo;
       public int nbrFrames;
+      public int nbrExcessRolls;
       public bool delta;
     }
 
     static bool TryParseArguments(string[] args, out ProgArgs progArgs)
     {
       progArgs = new ProgArgs();
-      if (args.Length > 5)
+      if (args.Length > 6)
         return false;
 
-      if (args.Length > 4)
+      if (args.Length > 5)
       {
-        if (args[4] != "-d" && args[4] != "--delta")
+        if (args[5] != "-d" && args[5] != "--delta")
           return false;
         progArgs.delta = true;
       }
@@ -254,6 +258,11 @@ namespace Log2Rng
       if (!int.TryParse(args[3], out progArgs.nbrFrames))
         return false;
       if (progArgs.nbrFrames < 0)
+        return false;
+      
+      if (!int.TryParse(args[4], out progArgs.nbrExcessRolls))
+        return false;
+      if (progArgs.nbrExcessRolls < 0)
         return false;
 
       return true;
@@ -284,9 +293,11 @@ namespace Log2Rng
 
     static void printHelp()
     {
-      Console.WriteLine("Syntax: dbzLog2StatsRng characterId fromLevel toLevel nbrFrames [-d | --delta\n");
+      Console.WriteLine("Syntax: dbzLog2StatsRng characterId fromLevel toLevel nbrFrames nbrExcessRolls [-d | --delta\n");
       Console.WriteLine("Output the CSV data of the stats generated in Dragon Ball Z: The legacy of Goku 2 for the");
-      Console.WriteLine("character characterId going from level fromLevel to level toLevel for nbrFrames frames.\n");
+      Console.WriteLine("character characterId going from level fromLevel to level toLevel for nbrFrames frames");
+      Console.WriteLine("with nbrExcessRolls additional RNG calls after file select fade out. This assumes frame 0");
+      Console.WriteLine("is pressing A upon skipping the intro cutscene and the frame output is when pressing A on file select\n");
       Console.WriteLine("Valid characterId are:");
       Console.WriteLine("0: Goham");
       Console.WriteLine("1: Unk1");
@@ -308,10 +319,37 @@ namespace Log2Rng
       }
 
       RngSeed seed = new RngSeed { seed1 = 0, seed2 = 0 };
+      // How to read this: the frame at which flowtimer will start is when you press the button to skip the intro,
+      // but this intro skip takes a few frames where no RNG calls happens which offsets all the timings, this is
+      // the fade in factor. Additionally, the final beep occur when pressing A on file select, but right after,
+      // there are additional frames of fade out where there are still RNG calls happening. They don't hinder the
+      // manip, but they must be taken into account by moving all the frames backwards (since one frame = 1 call)
+      int effectiveOffset = nbrFramesFadeIn - nbrFramesFadeOut;
+      
+      // We account for a fixed amount of calls before the generation is done, but this amount changes depending
+      // on which generation we are simulating
+      effectiveOffset -= progArgs.nbrExcessRolls;
+
+      // There is a special case to handle if we are loading an existing file. The game seems to do an RNG call
+      // each time a sprite gets created or its animation resets to idle. This affects the file select screen
+      // because if a file is present, the file icon will show the actual character sprite and when it is created,
+      // it will call RNG once. If we are on new game though, this won't happen which is only reasonable to assume
+      // if we simulate Trunks from level 1 since it's the only stats generation done on new game.
+      if (progArgs.character != Character.Trunks || progArgs.levelFrom != 1)
+        effectiveOffset--;
+
+      // Burn through impossible seeds
+      if (effectiveOffset < 0)
+      {
+        for (int i = effectiveOffset; i < 0; i++)
+          Rng(ref seed);
+      }
+
       CharacterStats baseStats = progArgs.delta ? new CharacterStats() : allCharacterData[progArgs.character].baseStats;
       CharacterStats stats = baseStats;
       StringBuilder sb = new StringBuilder();
       Console.WriteLine("Frame;Seeds;Max HP;Max EP;Str (hex);Ene (hex);Def (hex);Sum All");
+
       for (int i = 0; i < progArgs.nbrFrames; i++)
       {
         stats = LevelUpCharacterStatsFromLevelToLevel(seed, stats, progArgs.character, progArgs.levelFrom, progArgs.levelTo);
