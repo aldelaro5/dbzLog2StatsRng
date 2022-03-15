@@ -167,6 +167,8 @@ namespace Log2Rng
       }
     };
 
+    const double gbaFramerate = 59.72750056960583;
+
     const int nbrFramesFadeIn = 9;
     const int nbrFramesFadeOut = 33;
 
@@ -271,7 +273,7 @@ namespace Log2Rng
     static void OutputStatsLine(int frame, RngSeed seed, CharacterStats stats, StringBuilder sb)
     {
       sb.Clear();
-      sb.Append(frame);
+      sb.Append(frame + " (" + ((frame * (1 / gbaFramerate)) * 1000).ToString("0") + " ms)");
       sb.Append(";");
       sb.Append(seed.seed1.ToString("X8"));
       sb.Append("-");
