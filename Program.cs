@@ -332,14 +332,6 @@ namespace Log2Rng
       // on which generation we are simulating
       effectiveOffset -= progArgs.nbrExcessRolls;
 
-      // There is a special case to handle if we are loading an existing file. The game seems to do an RNG call
-      // each time a sprite gets created or its animation resets to idle. This affects the file select screen
-      // because if a file is present, the file icon will show the actual character sprite and when it is created,
-      // it will call RNG once. If we are on new game though, this won't happen which is only reasonable to assume
-      // if we simulate Trunks from level 1 since it's the only stats generation done on new game.
-      if (progArgs.character != Character.Trunks || progArgs.levelFrom != 1)
-        effectiveOffset--;
-
       // Burn through impossible seeds
       if (effectiveOffset < 0)
       {
