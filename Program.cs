@@ -8,7 +8,7 @@ namespace Log2Rng
     {
       Goham = 0,
       Piccolo,
-      Unk2,
+      Vegeta,
       Trunks,
       Unk4,
       Unk5,
@@ -90,7 +90,7 @@ namespace Log2Rng
         }
       },
       {
-        Character.Unk2, new CharacterData
+        Character.Vegeta, new CharacterData
         {
           levelUpBoosts = new CharacterLevelUpBoosts
           {

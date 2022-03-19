@@ -15,7 +15,7 @@ Valid characterId are:
 
 0. Goham
 1. Piccolo
-2. Unk2
+2. Vegeta
 3. Trunks
 4. Unk4
 5. Unk5
