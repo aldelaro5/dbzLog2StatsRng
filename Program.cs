@@ -7,7 +7,7 @@ namespace Log2Rng
     enum Character
     {
       Goham = 0,
-      Unk1,
+      Piccolo,
       Unk2,
       Trunks,
       Unk4,
@@ -71,7 +71,7 @@ namespace Log2Rng
         }
       },
       {
-        Character.Unk1, new CharacterData
+        Character.Piccolo, new CharacterData
         {
           levelUpBoosts = new CharacterLevelUpBoosts
           {
@@ -302,7 +302,7 @@ namespace Log2Rng
       Console.WriteLine("is pressing A upon skipping the intro cutscene and the frame output is when pressing A on file select\n");
       Console.WriteLine("Valid characterId are:");
       Console.WriteLine("0: Goham");
-      Console.WriteLine("1: Unk1");
+      Console.WriteLine("1: Piccolo");
       Console.WriteLine("2: Unk2");
       Console.WriteLine("3: Trunks");
       Console.WriteLine("4: Unk4");

@@ -14,7 +14,7 @@ Output the CSV data of the stats generated in Dragon Ball Z: The legacy of Goku 
 Valid characterId are:
 
 0. Goham
-1. Unk1
+1. Piccolo
 2. Unk2
 3. Trunks
 4. Unk4
