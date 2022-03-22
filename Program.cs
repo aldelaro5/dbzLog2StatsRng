@@ -303,7 +303,7 @@ namespace Log2Rng
       Console.WriteLine("Valid characterId are:");
       Console.WriteLine("0: Goham");
       Console.WriteLine("1: Piccolo");
-      Console.WriteLine("2: Unk2");
+      Console.WriteLine("2: Vegeta");
       Console.WriteLine("3: Trunks");
       Console.WriteLine("4: Unk4");
       Console.WriteLine("5: Unk5\n");
