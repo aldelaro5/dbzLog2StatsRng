@@ -15,6 +15,14 @@ namespace Log2Rng
       COUNT
     }
 
+    enum NpcDirection
+    {
+      Down = 0,
+      Up,
+      Left,
+      Right
+    }
+
     struct RngSeed
     {
       public uint seed1;
@@ -172,6 +180,8 @@ namespace Log2Rng
     const int nbrFramesFadeIn = 9;
     const int nbrFramesFadeOut = 33;
 
+    const int nbrFramesTrunks2ManipFirstScreen = 286;
+
     static uint Rng(ref RngSeed seed)
     {
       seed.seed1 = seed.seed1 + 0x2cbbc71 ^ seed.seed2;
@@ -183,6 +193,11 @@ namespace Log2Rng
     static ushort RngShort(ref RngSeed seed, ushort max)
     {
       return (ushort)(max * (Rng(ref seed) & 0xFFFF) >> 0x10);
+    }
+
+    static bool RngChanceOver65536(ref RngSeed seed, ushort chance)
+    {
+      return (ushort)(Rng(ref seed) & 0xFFFF) < chance;
     }
 
     static ushort levelUpStatsByRange(ref RngSeed seed, StatsBoostRange range, int levelAmount, ushort stat)
@@ -214,6 +229,75 @@ namespace Log2Rng
         } while (levelFrom < levelTo);
       }
       return newStats;
+    }
+
+    static bool MrPopoDirectionCheck(ref RngSeed seed, ref NpcDirection direction)
+    {
+      if (RngChanceOver65536(ref seed, 0x4c0))
+      {
+        int newDirection = RngShort(ref seed, 5);
+        if (newDirection != 4)
+          direction = (NpcDirection)newDirection;
+        return true;
+      }
+      return false;
+    }
+
+    static void RollRngThroughTrunks2FirstScreen(ref RngSeed seed)
+    {
+      NpcDirection currentDirection = NpcDirection.Down;
+      int x = 0;
+      int y = 0;
+      int frameCount = 0;
+      int noCheckTimeout = 0;
+      while (frameCount < nbrFramesTrunks2ManipFirstScreen)
+      {
+        frameCount++;
+        if (noCheckTimeout > 0)
+        {
+          noCheckTimeout--;
+          if (noCheckTimeout == 0)
+          {
+            frameCount++;
+            Rng(ref seed);
+          }
+        }
+        else if (MrPopoDirectionCheck(ref seed, ref currentDirection))
+        {
+          bool canWalk = false;
+          switch (currentDirection)
+          {
+            case NpcDirection.Up:
+              if (y < 1)
+              {
+                y++;
+                canWalk = true;
+              }
+              break;
+            case NpcDirection.Down:
+              if (y > -1)
+              {
+                y--;
+                canWalk = true;
+              }
+              break;
+            case NpcDirection.Left:
+              x--;
+              canWalk = true;
+              break;
+            case NpcDirection.Right:
+              if (x < 2)
+              {
+                x++;
+                canWalk = true;
+              }
+              break;
+          }
+
+          if (canWalk)
+            noCheckTimeout = 52;
+        }
+      }
     }
 
     struct ProgArgs
@@ -261,7 +345,7 @@ namespace Log2Rng
         return false;
       if (progArgs.nbrFrames < 0)
         return false;
-      
+
       if (!int.TryParse(args[4], out progArgs.nbrExcessRolls))
         return false;
       if (progArgs.nbrExcessRolls < 0)
@@ -327,7 +411,7 @@ namespace Log2Rng
       // there are additional frames of fade out where there are still RNG calls happening. They don't hinder the
       // manip, but they must be taken into account by moving all the frames backwards (since one frame = 1 call)
       int effectiveOffset = nbrFramesFadeIn - nbrFramesFadeOut;
-      
+
       // We account for a fixed amount of calls before the generation is done, but this amount changes depending
       // on which generation we are simulating
       effectiveOffset -= progArgs.nbrExcessRolls;
@@ -346,8 +430,19 @@ namespace Log2Rng
 
       for (int i = 0; i < progArgs.nbrFrames; i++)
       {
-        stats = LevelUpCharacterStatsFromLevelToLevel(seed, stats, progArgs.character, progArgs.levelFrom, progArgs.levelTo);
-        OutputStatsLine(i, seed, stats, sb);
+        RngSeed actualSeed = seed;
+        if (progArgs.character == Character.Trunks && progArgs.levelFrom == 6)
+        {
+          for (int j = 0; j < 4; j++)
+            Rng(ref actualSeed);
+
+          RollRngThroughTrunks2FirstScreen(ref actualSeed);
+          
+          for (int j = 0; j < 12; j++)
+            Rng(ref actualSeed);
+        }
+        stats = LevelUpCharacterStatsFromLevelToLevel(actualSeed, stats, progArgs.character, progArgs.levelFrom, progArgs.levelTo);
+        OutputStatsLine(i, actualSeed, stats, sb);
         Rng(ref seed);
         stats = baseStats;
       }
