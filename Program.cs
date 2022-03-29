@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 
 namespace Log2Rng
 {
@@ -11,8 +12,7 @@ namespace Log2Rng
       Vegeta,
       Trunks,
       Unk4,
-      Unk5,
-      COUNT
+      Unk5
     }
 
     enum NpcDirection
@@ -21,6 +21,14 @@ namespace Log2Rng
       Up,
       Left,
       Right
+    }
+
+    enum ManipPreset
+    {
+      Trunks1 = 0,
+      Piccolo,
+      Trunks2,
+      MANUAL
     }
 
     struct RngSeed
@@ -51,128 +59,95 @@ namespace Log2Rng
       public ushort def;
     }
 
-    struct CharacterData
+    struct ManipParams
     {
-      public CharacterLevelUpBoosts levelUpBoosts;
-      public CharacterStats baseStats;
+      public Character character;
+      public int levelFrom;
+      public int levelTo;
+      public int nbrExcessRolls;
     }
 
-    static Dictionary<Character, CharacterData> allCharacterData = new Dictionary<Character, CharacterData>
+    static Dictionary<Character, CharacterLevelUpBoosts> allCharacterStatsBoostRanges = new Dictionary<Character, CharacterLevelUpBoosts>
     {
       {
-        Character.Goham, new CharacterData
+        Character.Goham, new CharacterLevelUpBoosts
         {
-          levelUpBoosts = new CharacterLevelUpBoosts
-          {
-            str = new StatsBoostRange {min = 0x13E, max = 0x206},
-            ene = new StatsBoostRange {min = 0x12E, max = 0x1F6},
-            def = new StatsBoostRange {min = 0x100, max = 0x1C8}
-          },
-          baseStats = new CharacterStats
-          {
-            maxHp = 85,
-            maxEp = 20,
-            str = 0x300,
-            ene = 0x500,
-            def = 0x300
-          }
+          str = new StatsBoostRange {min = 0x13E, max = 0x206},
+          ene = new StatsBoostRange {min = 0x12E, max = 0x1F6},
+          def = new StatsBoostRange {min = 0x100, max = 0x1C8}
         }
       },
       {
-        Character.Piccolo, new CharacterData
+        Character.Piccolo, new CharacterLevelUpBoosts
         {
-          levelUpBoosts = new CharacterLevelUpBoosts
-          {
-            str = new StatsBoostRange {min = 0xE0, max = 0x1A8},
-            ene = new StatsBoostRange {min = 0xF5, max = 0x1BD},
-            def = new StatsBoostRange {min = 0xD0, max = 0x198}
-          },
-          baseStats = new CharacterStats
-          {
-            maxHp = 95,
-            maxEp = 20,
-            str = 0x400,
-            ene = 0x400,
-            def = 0x500
-          }
+          str = new StatsBoostRange {min = 0xE0, max = 0x1A8},
+          ene = new StatsBoostRange {min = 0xF5, max = 0x1BD},
+          def = new StatsBoostRange {min = 0xD0, max = 0x198}
         }
       },
       {
-        Character.Vegeta, new CharacterData
+        Character.Vegeta, new CharacterLevelUpBoosts
         {
-          levelUpBoosts = new CharacterLevelUpBoosts
-          {
-            str = new StatsBoostRange {min = 0xEA, max = 0x1B2},
-            ene = new StatsBoostRange {min = 0xDB, max = 0x1A3},
-            def = new StatsBoostRange {min = 0xF5, max = 0x1BD}
-          },
-          baseStats = new CharacterStats
-          {
-            maxHp = 105,
-            maxEp = 20,
-            str = 0x600,
-            ene = 0x400,
-            def = 0x600
-          }
+          str = new StatsBoostRange {min = 0xEA, max = 0x1B2},
+          ene = new StatsBoostRange {min = 0xDB, max = 0x1A3},
+          def = new StatsBoostRange {min = 0xF5, max = 0x1BD}
         }
       },
       {
-        Character.Trunks, new CharacterData
+        Character.Trunks, new CharacterLevelUpBoosts
         {
-          levelUpBoosts = new CharacterLevelUpBoosts
-          {
-            str = new StatsBoostRange {min = 0x11F, max = 0x1E7},
-            ene = new StatsBoostRange {min = 0xAC, max = 0x174},
-            def = new StatsBoostRange {min = 0xB6, max = 0x17E}
-          },
-          baseStats = new CharacterStats
-          {
-            maxHp = 110,
-            maxEp = 20,
-            str = 0x600,
-            ene = 0x300,
-            def = 0x400
-          }
+          str = new StatsBoostRange {min = 0x11F, max = 0x1E7},
+          ene = new StatsBoostRange {min = 0xAC, max = 0x174},
+          def = new StatsBoostRange {min = 0xB6, max = 0x17E}
         }
       },
       {
-        Character.Unk4, new CharacterData
+        Character.Unk4, new CharacterLevelUpBoosts
         {
-          levelUpBoosts = new CharacterLevelUpBoosts
-          {
-            str = new StatsBoostRange {min = 0xFF, max = 0x1C7},
-            ene = new StatsBoostRange {min = 0xFF, max = 0x1C7},
-            def = new StatsBoostRange {min = 0xC6, max = 0x18E}
-          },
-          baseStats = new CharacterStats
-          {
-            maxHp = 100,
-            maxEp = 20,
-            str = 0x500,
-            ene = 0x700,
-            def = 0x600
-          }
+          str = new StatsBoostRange {min = 0xFF, max = 0x1C7},
+          ene = new StatsBoostRange {min = 0xFF, max = 0x1C7},
+          def = new StatsBoostRange {min = 0xC6, max = 0x18E}
         }
       },
       {
-        Character.Unk5, new CharacterData
+        Character.Unk5, new CharacterLevelUpBoosts
         {
-          levelUpBoosts = new CharacterLevelUpBoosts
-          {
-            str = new StatsBoostRange {min = 0x40, max = 0xC0},
-            ene = new StatsBoostRange {min = 0x40, max = 0xC0},
-            def = new StatsBoostRange {min = 0x40, max = 0xC0}
-          },
-          baseStats = new CharacterStats
-          {
-            maxHp = 50,
-            maxEp = 20,
-            str = 0x800,
-            ene = 0x100,
-            def = 0x600
-          }
+          str = new StatsBoostRange {min = 0x40, max = 0xC0},
+          ene = new StatsBoostRange {min = 0x40, max = 0xC0},
+          def = new StatsBoostRange {min = 0x40, max = 0xC0}
         }
       }
+    };
+
+    static Dictionary<ManipPreset, ManipParams> allManipPresets = new Dictionary<ManipPreset, ManipParams>
+    {
+      {
+        ManipPreset.Trunks1, new ManipParams
+        {
+          character = Character.Trunks,
+          levelFrom = 1,
+          levelTo = 6,
+          nbrExcessRolls = 2
+        }
+      },
+      {
+        ManipPreset.Piccolo, new ManipParams
+        {
+          character = Character.Piccolo,
+          levelFrom = 1,
+          levelTo = 10,
+          nbrExcessRolls = 16
+        }
+      },
+      {
+        ManipPreset.Trunks2, new ManipParams
+        {
+          character = Character.Trunks,
+          levelFrom = 6,
+          levelTo = 27,
+          nbrExcessRolls = 0
+        }
+      },
     };
 
     const double gbaFramerate = 59.72750056960583;
@@ -213,9 +188,9 @@ namespace Log2Rng
     {
       CharacterStats newStats = new CharacterStats();
       int levelAmount = levelTo - levelFrom;
-      newStats.str = levelUpStatsByRange(ref seed, allCharacterData[character].levelUpBoosts.str, levelAmount, stats.str);
-      newStats.ene = levelUpStatsByRange(ref seed, allCharacterData[character].levelUpBoosts.ene, levelAmount, stats.ene);
-      newStats.def = levelUpStatsByRange(ref seed, allCharacterData[character].levelUpBoosts.def, levelAmount, stats.def);
+      newStats.str = levelUpStatsByRange(ref seed, allCharacterStatsBoostRanges[character].str, levelAmount, stats.str);
+      newStats.ene = levelUpStatsByRange(ref seed, allCharacterStatsBoostRanges[character].ene, levelAmount, stats.ene);
+      newStats.def = levelUpStatsByRange(ref seed, allCharacterStatsBoostRanges[character].def, levelAmount, stats.def);
       newStats.maxHp = stats.maxHp;
       newStats.maxEp = stats.maxEp;
       if (levelFrom < levelTo)
@@ -302,54 +277,83 @@ namespace Log2Rng
 
     struct ProgArgs
     {
-      public Character character;
-      public int levelFrom;
-      public int levelTo;
+      public ManipPreset preset;
+      public ManipParams manipParams;
       public int nbrFrames;
-      public int nbrExcessRolls;
-      public bool delta;
+      public RngSeed startingSeed;
+    }
+
+    static bool tryParseSeed(string strSeed, out RngSeed seed)
+    {
+      seed = new RngSeed();
+      string[] seedParts = strSeed.Split('-');
+      if (seedParts.Length != 2)
+        return false;
+      if (!uint.TryParse(seedParts[0], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out seed.seed1))
+        return false;
+      if (!uint.TryParse(seedParts[1], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out seed.seed2))
+        return false;
+      return true;
     }
 
     static bool TryParseArguments(string[] args, out ProgArgs progArgs)
     {
       progArgs = new ProgArgs();
-      if (args.Length > 6)
+      if (args.Length == 0 || (args.Length != 2 && args.Length != 3 && args.Length != 6))
         return false;
 
-      if (args.Length > 5)
+      if (!Enum.TryParse(args[0], true, out progArgs.preset))
+        return false;
+
+      if (args.Length == 2 || args.Length != 3)
       {
-        if (args[5] != "-d" && args[5] != "--delta")
+        if (progArgs.preset == ManipPreset.MANUAL)
           return false;
-        progArgs.delta = true;
+
+        if (!int.TryParse(args[1], out progArgs.nbrFrames))
+          return false;
+        if (progArgs.nbrFrames < 0)
+          return false;
+
+        progArgs.startingSeed.seed1 = 0;
+        progArgs.startingSeed.seed2 = 0;
+        if (args.Length == 3 && !tryParseSeed(args[1].ToUpper(), out progArgs.startingSeed))
+          return false;
+
+        progArgs.manipParams = allManipPresets[progArgs.preset];
+        return true;
       }
+      else
+      {
+        if (progArgs.preset != ManipPreset.MANUAL)
+          return false;
 
-      if (!Enum.TryParse(args[0], out progArgs.character))
-        return false;
-      if (progArgs.character < 0 || progArgs.character >= Character.COUNT)
-        return false;
+        if (!Enum.TryParse(args[1], true, out progArgs.manipParams.character))
+          return false;
 
-      if (!int.TryParse(args[1], out progArgs.levelFrom))
-        return false;
-      if (progArgs.levelFrom < 0)
-        return false;
+        if (!int.TryParse(args[2], out progArgs.manipParams.levelFrom))
+          return false;
+        if (progArgs.manipParams.levelFrom < 0)
+          return false;
 
-      if (!int.TryParse(args[2], out progArgs.levelTo))
-        return false;
-      if (progArgs.levelTo < 0)
-        return false;
+        if (!int.TryParse(args[3], out progArgs.manipParams.levelTo))
+          return false;
+        if (progArgs.manipParams.levelTo < 0)
+          return false;
 
-      if (progArgs.levelFrom >= progArgs.levelTo)
-        return false;
+        if (progArgs.manipParams.levelFrom >= progArgs.manipParams.levelTo)
+          return false;
 
-      if (!int.TryParse(args[3], out progArgs.nbrFrames))
-        return false;
-      if (progArgs.nbrFrames < 0)
-        return false;
+        progArgs.manipParams.nbrExcessRolls = 0;
 
-      if (!int.TryParse(args[4], out progArgs.nbrExcessRolls))
-        return false;
-      if (progArgs.nbrExcessRolls < 0)
-        return false;
+        if (!int.TryParse(args[4], out progArgs.nbrFrames))
+          return false;
+        if (progArgs.nbrFrames < 0)
+          return false;
+
+        if (!tryParseSeed(args[5].ToUpper(), out progArgs.startingSeed))
+          return false;
+      }
 
       return true;
     }
@@ -379,20 +383,28 @@ namespace Log2Rng
 
     static void printHelp()
     {
-      Console.WriteLine("Syntax: dbzLog2StatsRng characterId fromLevel toLevel nbrFrames nbrExcessRolls [-d | --delta\n");
-      Console.WriteLine("Output the CSV data of the stats generated in Dragon Ball Z: The legacy of Goku 2 for the");
-      Console.WriteLine("character characterId going from level fromLevel to level toLevel for nbrFrames frames");
-      Console.WriteLine("with nbrExcessRolls additional RNG calls after file select fade out. This assumes frame 0");
-      Console.WriteLine("is pressing A upon skipping the intro cutscene and the frame output is when pressing A on file select\n");
+      Console.WriteLine("Syntax: dbzLog2StatsRng preset nbrFrames [startingSeed]");
+      Console.WriteLine("        dbzLog2StatsRng 'manual' character fromLevel toLevel nbrFrames startingSeed\n");
+      Console.WriteLine("Output the CSV data of the delta stats generated in Dragon Ball Z: The legacy of Goku 2 from a");
+      Console.WriteLine("preset RTA manip optionally starting from startingSeed (0-0 by default) or for character going from level"); 
+      Console.WriteLine("fromLevel to level toLevel for nbrFrames frames starting at startingSeed. The startingSeed");
+      Console.WriteLine("has the following format: seed1-seed2 where both seed1 and seed2 are hexadecimal numbers. The");
+      Console.WriteLine("preset format is more suited for RTA manips while manual is more suited for TASing.\n");
+      Console.WriteLine("For the RTA preset format, assumes frame 0 is pressing A upon skipping the intro cutscene and");
+      Console.WriteLine("the frame output is when pressing A on file select\n");
+      Console.WriteLine("Valid presets are:");
+      Console.WriteLine("trunks1");
+      Console.WriteLine("piccolo");
+      Console.WriteLine("trunks2\n");
+      Console.WriteLine("For the manual format, all parameters and a starting seed must be provided without the ability");
+      Console.WriteLine("to have excess calls\n");
       Console.WriteLine("Valid characterId are:");
-      Console.WriteLine("0: Goham");
-      Console.WriteLine("1: Piccolo");
-      Console.WriteLine("2: Vegeta");
-      Console.WriteLine("3: Trunks");
-      Console.WriteLine("4: Unk4");
-      Console.WriteLine("5: Unk5\n");
-      Console.WriteLine("The -d or --delta option will output only the delta from all stats set to 0");
-      Console.WriteLine("rather than from the character's base stats");
+      Console.WriteLine("goham");
+      Console.WriteLine("piccolo");
+      Console.WriteLine("vegeta");
+      Console.WriteLine("trunks");
+      Console.WriteLine("unk4");
+      Console.WriteLine("unk5\n");
     }
 
     static void Main(string[] args)
@@ -404,47 +416,54 @@ namespace Log2Rng
         return;
       }
 
-      RngSeed seed = new RngSeed { seed1 = 0, seed2 = 0 };
-      // How to read this: the frame at which flowtimer will start is when you press the button to skip the intro,
-      // but this intro skip takes a few frames where no RNG calls happens which offsets all the timings, this is
-      // the fade in factor. Additionally, the final beep occur when pressing A on file select, but right after,
-      // there are additional frames of fade out where there are still RNG calls happening. They don't hinder the
-      // manip, but they must be taken into account by moving all the frames backwards (since one frame = 1 call)
-      int effectiveOffset = nbrFramesFadeIn - nbrFramesFadeOut;
-
-      // We account for a fixed amount of calls before the generation is done, but this amount changes depending
-      // on which generation we are simulating
-      effectiveOffset -= progArgs.nbrExcessRolls;
-
-      // Burn through impossible seeds
-      if (effectiveOffset < 0)
+      RngSeed seed = progArgs.startingSeed;
+      if (progArgs.preset != ManipPreset.MANUAL)
       {
-        for (int i = effectiveOffset; i < 0; i++)
-          Rng(ref seed);
+        // How to read this: the frame at which flowtimer will start is when you press the button to skip the intro,
+        // but this intro skip takes a few frames where no RNG calls happens which offsets all the timings, this is
+        // the fade in factor. Additionally, the final beep occur when pressing A on file select, but right after,
+        // there are additional frames of fade out where there are still RNG calls happening. They don't hinder the
+        // manip, but they must be taken into account by moving all the frames backwards (since one frame = 1 call)
+        int effectiveOffset = nbrFramesFadeIn - nbrFramesFadeOut;
+
+        // We account for a fixed amount of calls before the generation is done, but this amount changes depending
+        // on which generation we are simulating
+        effectiveOffset -= progArgs.manipParams.nbrExcessRolls;
+
+        // Burn through impossible seeds
+        if (effectiveOffset < 0)
+        {
+          for (int i = effectiveOffset; i < 0; i++)
+            Rng(ref seed);
+        }
       }
 
-      CharacterStats baseStats = progArgs.delta ? new CharacterStats() : allCharacterData[progArgs.character].baseStats;
-      CharacterStats stats = baseStats;
+      CharacterStats stats = new CharacterStats();
       StringBuilder sb = new StringBuilder();
       Console.WriteLine("Frame;Seeds;Max HP;Max EP;Str (hex);Ene (hex);Def (hex);Sum All");
 
       for (int i = 0; i < progArgs.nbrFrames; i++)
       {
         RngSeed actualSeed = seed;
-        if (progArgs.character == Character.Trunks && progArgs.levelFrom == 6)
+        CharacterStats actualStats = stats;
+        // Trunks2 has complications caused by the Mr Popo NPC that has a walk cycle influenced by RNG.
+        // To properly track the seed, we need to simulate his RNG patterns and make a few assumptions namely
+        // that the player will never run into him or that he won't try to run into the player all while the player
+        // never releases the dpad and only goes up with the possibility to use the diuagonals
+        if (progArgs.preset == ManipPreset.Trunks2)
         {
           for (int j = 0; j < 4; j++)
             Rng(ref actualSeed);
 
           RollRngThroughTrunks2FirstScreen(ref actualSeed);
-          
+
           for (int j = 0; j < 12; j++)
             Rng(ref actualSeed);
         }
-        stats = LevelUpCharacterStatsFromLevelToLevel(actualSeed, stats, progArgs.character, progArgs.levelFrom, progArgs.levelTo);
-        OutputStatsLine(i, actualSeed, stats, sb);
+        actualStats = LevelUpCharacterStatsFromLevelToLevel(actualSeed, actualStats, progArgs.manipParams.character,
+                                                            progArgs.manipParams.levelFrom, progArgs.manipParams.levelTo);
+        OutputStatsLine(i, actualSeed, actualStats, sb);
         Rng(ref seed);
-        stats = baseStats;
       }
     }
   }
