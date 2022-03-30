@@ -11,8 +11,8 @@ namespace Log2Rng
       Piccolo,
       Vegeta,
       Trunks,
-      Unk4,
-      Unk5
+      Goku,
+      Hercules
     }
 
     enum NpcDirection
@@ -102,7 +102,7 @@ namespace Log2Rng
         }
       },
       {
-        Character.Unk4, new CharacterLevelUpBoosts
+        Character.Goku, new CharacterLevelUpBoosts
         {
           str = new StatsBoostRange {min = 0xFF, max = 0x1C7},
           ene = new StatsBoostRange {min = 0xFF, max = 0x1C7},
@@ -110,7 +110,7 @@ namespace Log2Rng
         }
       },
       {
-        Character.Unk5, new CharacterLevelUpBoosts
+        Character.Hercules, new CharacterLevelUpBoosts
         {
           str = new StatsBoostRange {min = 0x40, max = 0xC0},
           ene = new StatsBoostRange {min = 0x40, max = 0xC0},
@@ -403,8 +403,8 @@ namespace Log2Rng
       Console.WriteLine("piccolo");
       Console.WriteLine("vegeta");
       Console.WriteLine("trunks");
-      Console.WriteLine("unk4");
-      Console.WriteLine("unk5\n");
+      Console.WriteLine("goku");
+      Console.WriteLine("hercules\n");
     }
 
     static void Main(string[] args)

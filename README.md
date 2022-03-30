@@ -29,5 +29,5 @@ Valid characterId are:
 - piccolo
 - vegeta
 - trunks
-- unk4
-- unk5
+- goku
+- hercules
