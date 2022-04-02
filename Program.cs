@@ -145,7 +145,8 @@ namespace Log2Rng
           character = Character.Trunks,
           levelFrom = 6,
           levelTo = 27,
-          nbrExcessRolls = 0
+          // There are JUST for the sprites on file select
+          nbrExcessRolls = 3
         }
       },
     };
@@ -208,6 +209,7 @@ namespace Log2Rng
 
     static bool MrPopoDirectionCheck(ref RngSeed seed, ref NpcDirection direction)
     {
+      // This is a less than 2% check
       if (RngChanceOver65536(ref seed, 0x4c0))
       {
         int newDirection = RngShort(ref seed, 5);
@@ -218,6 +220,13 @@ namespace Log2Rng
       return false;
     }
 
+    // Trunks2 is special because there is an npc called Mr Popo that has a random walk cycle
+    // which must be accounted for in the simulations. It goes like this: for every frame,
+    // we try to walk with a certain chance defined by what seems to be the npc (less than 2% here)
+    // and if it passes, the npc will generate a random direction (one is the current direction)
+    // and if they can walk there, they will walk for 52 frames at which point no RNG will be called.
+    // After the walk cycle is done, a frame is burned for the sprite idle RNG call and the cycle repeats.
+    // The reason the NPC might not be able to walk has to do with either walls or its boundaries.
     static void RollRngThroughTrunks2FirstScreen(ref RngSeed seed)
     {
       NpcDirection currentDirection = NpcDirection.Down;
@@ -231,6 +240,7 @@ namespace Log2Rng
         if (noCheckTimeout > 0)
         {
           noCheckTimeout--;
+          // When we are done walking, burn the frame and simulate the sprite idle RNG call
           if (noCheckTimeout == 0)
           {
             frameCount++;
@@ -240,6 +250,9 @@ namespace Log2Rng
         else if (MrPopoDirectionCheck(ref seed, ref currentDirection))
         {
           bool canWalk = false;
+          // The boundaries of this NPC is set in such a way that he cannot walk more than
+          // 1 tiles away from spawn vertically and not more than 2 away on the right.
+          // He can walk a long distance on the left, enough to not care about it in this simulation
           switch (currentDirection)
           {
             case NpcDirection.Up:
