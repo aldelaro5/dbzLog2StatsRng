@@ -52,7 +52,16 @@ namespace Log2Rng
 
     struct CharacterStats
     {
-      public ushort maxHp;
+      public CharacterStats()
+      {
+        maxHpCoefficient = 1.0m;
+        maxEp = 0;
+        str = 0;
+        ene = 0;
+        def = 0;
+      }
+
+      public decimal maxHpCoefficient;
       public ushort maxEp;
       public ushort str;
       public ushort ene;
@@ -192,14 +201,15 @@ namespace Log2Rng
       newStats.str = levelUpStatsByRange(ref seed, allCharacterStatsBoostRanges[character].str, levelAmount, stats.str);
       newStats.ene = levelUpStatsByRange(ref seed, allCharacterStatsBoostRanges[character].ene, levelAmount, stats.ene);
       newStats.def = levelUpStatsByRange(ref seed, allCharacterStatsBoostRanges[character].def, levelAmount, stats.def);
-      newStats.maxHp = stats.maxHp;
+      newStats.maxHpCoefficient = stats.maxHpCoefficient;
       newStats.maxEp = stats.maxEp;
       if (levelFrom < levelTo)
       {
         do
         {
           // This will increase the max HP by a percentage between 5.5% and 7.5%
-          newStats.maxHp += (ushort)((newStats.maxHp * (RngShort(ref seed, 0x51f) + 0xe14)) >> 0x10);
+          // Since we are just showing the delta, we just cumulate the coefficents
+          newStats.maxHpCoefficient *= 1 + (decimal)(RngShort(ref seed, 0x51f) + 0xe14) / 65536m;
           newStats.maxEp += (ushort)(RngShort(ref seed, 3) + 2);
           levelFrom++;
         } while (levelFrom < levelTo);
@@ -380,7 +390,7 @@ namespace Log2Rng
       sb.Append("-");
       sb.Append(seed.seed2.ToString("X8"));
       sb.Append(";");
-      sb.Append(stats.maxHp);
+      sb.Append((stats.maxHpCoefficient * 100m).ToString("N6"));
       sb.Append(";");
       sb.Append(stats.maxEp);
       sb.Append(";");
@@ -390,7 +400,7 @@ namespace Log2Rng
       sb.Append(";");
       sb.Append(stats.def.ToString("X4"));
       sb.Append(";");
-      sb.Append(stats.maxHp + stats.maxEp + stats.str + stats.ene + stats.def);
+      sb.Append(stats.maxHpCoefficient + stats.maxEp + stats.str + stats.ene + stats.def);
       Console.WriteLine(sb.ToString());
     }
 
@@ -453,7 +463,7 @@ namespace Log2Rng
 
       CharacterStats stats = new CharacterStats();
       StringBuilder sb = new StringBuilder();
-      Console.WriteLine("Frame;Seeds;Max HP;Max EP;Str (hex);Ene (hex);Def (hex);Sum All");
+      Console.WriteLine("Frame;Seeds;Max HP increase (%);Max EP;Str (hex);Ene (hex);Def (hex);Sum All");
 
       for (int i = 0; i < progArgs.nbrFrames; i++)
       {
